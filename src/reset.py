@@ -17,6 +17,8 @@ def show_loading_bar(message="Resetting database"):
     Simple loading bar for the console reset flow.
     """
     total_steps = 20
+    total_seconds = 1.75
+    delay = total_seconds / total_steps
 
     print()
     print(message)
@@ -27,7 +29,7 @@ def show_loading_bar(message="Resetting database"):
         percent = int((step / total_steps) * 100)
 
         print(f"\r[{filled}{empty}] {percent}%", end="", flush=True)
-        time.sleep(0.08)
+        time.sleep(delay)
 
     print("\n")
 

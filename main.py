@@ -3,6 +3,7 @@ import os
 from colorama import init
 
 from src.db import get_connection
+from src.demo import run_guided_demo
 from src.display import get_all_table_rows, show_all_tables, show_change_summary
 from src.reset import reset_database
 from src.status import (
@@ -17,6 +18,7 @@ from src.transactions import (
     add_product_p100_and_stock,
     delete_depot_d1,
     delete_product_p1,
+    rollback_failure_demo,
     update_depot_d1_to_dd1,
     update_product_p1_to_pp1,
 )
@@ -72,6 +74,11 @@ def print_menu():
     print("7. Change depot d1 to dd1")
     print("8. Add product p100 and stock row")
     print("9. Add depot d100 and stock row")
+
+    print("\nDemo")
+    print("-" * 60)
+    print("10. Run guided demo mode")
+    print("11. Run rollback/failure demo")
 
     print("\n0. Exit")
     print("-" * 60)
@@ -211,6 +218,16 @@ def main():
                         connection,
                         "Transaction 6: Add depot d100 and stock row",
                         add_depot_d100_and_stock,
+                    )
+
+                elif choice == "10":
+                    run_guided_demo(connection, clear_screen, print_header, pause)
+
+                elif choice == "11":
+                    show_before_after(
+                        connection,
+                        "Rollback Demo: Failed transaction with rollback",
+                        rollback_failure_demo,
                     )
 
                 elif choice == "0":

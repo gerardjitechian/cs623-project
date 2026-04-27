@@ -17,7 +17,9 @@ def delete_product_p1(connection):
             )
 
             if cursor.rowcount != 1:
-                raise ValueError("Product p1 was not found. Reset the database before running this transaction.")
+                raise ValueError(
+                    "Product p1 was not found. Reset the database before running this transaction."
+                )
 
         connection.commit()
         print("\nTransaction committed successfully.")
@@ -51,7 +53,9 @@ def delete_depot_d1(connection):
             )
 
             if cursor.rowcount != 1:
-                raise ValueError("Depot d1 was not found. Reset the database before running this transaction.")
+                raise ValueError(
+                    "Depot d1 was not found. Reset the database before running this transaction."
+                )
 
         connection.commit()
         print("\nTransaction committed successfully.")
@@ -86,7 +90,9 @@ def update_product_p1_to_pp1(connection):
             )
 
             if cursor.rowcount != 1:
-                raise ValueError("Product p1 was not found. Reset the database before running this transaction.")
+                raise ValueError(
+                    "Product p1 was not found. Reset the database before running this transaction."
+                )
 
         connection.commit()
         print("\nTransaction committed successfully.")
@@ -121,7 +127,9 @@ def update_depot_d1_to_dd1(connection):
             )
 
             if cursor.rowcount != 1:
-                raise ValueError("Depot d1 was not found. Reset the database before running this transaction.")
+                raise ValueError(
+                    "Depot d1 was not found. Reset the database before running this transaction."
+                )
 
         connection.commit()
         print("\nTransaction committed successfully.")
@@ -212,5 +220,54 @@ def add_depot_d100_and_stock(connection):
     except Exception as error:
         connection.rollback()
         print("\nTransaction failed. Changes were rolled back.")
+        print(f"Reason: {error}")
+        return False
+
+
+def rollback_failure_demo(connection):
+    """
+    Rollback / failure demo:
+    This intentionally creates a failing transaction.
+
+    Step 1 inserts a valid Product row.
+    Step 2 tries to insert a Stock row that references a depot that does not exist.
+
+    The second step should fail because of the foreign key constraint.
+    The rollback should undo the Product insert from step 1.
+    """
+    try:
+        with connection.cursor() as cursor:
+            print("\nAttempting demo transaction...")
+            print("Step 1: Insert Product row (p200, demo_item, 10)")
+
+            cursor.execute(
+                """
+                INSERT INTO Product (prodid, pname, price)
+                VALUES (%s, %s, %s);
+                """,
+                ("p200", "demo_item", 10),
+            )
+
+            print("Step 2: Insert Stock row (p200, bad_depot, 25)")
+            print("This should fail because bad_depot does not exist in Depot.")
+
+            cursor.execute(
+                """
+                INSERT INTO Stock (prodid, depid, quantity)
+                VALUES (%s, %s, %s);
+                """,
+                ("p200", "bad_depot", 25),
+            )
+
+        connection.commit()
+        print("\nUnexpected result: transaction committed.")
+        print("Check whether foreign key constraints are installed correctly.")
+        return True
+
+    except Exception as error:
+        connection.rollback()
+        print("\nExpected failure occurred.")
+        print("Transaction was rolled back successfully.")
+        print("The Product insert from Step 1 was undone.")
         print(f"Reason: {error}")
         return False
