@@ -1,18 +1,26 @@
+from tabulate import tabulate
+
+
 def print_rows(title, columns, rows):
     """
-    Print rows in a simple table format for the console demo.
+    Print rows as a clean console table.
     """
-    print("\n" + title)
-    print("-" * 60)
-    print(" | ".join(columns))
+    print(f"\n{title}")
     print("-" * 60)
 
     if not rows:
         print("(no rows)")
         return
 
-    for row in rows:
-        print(" | ".join(str(value) for value in row))
+    print(
+        tabulate(
+            rows,
+            headers=columns,
+            tablefmt="pretty",
+            numalign="right",
+            stralign="left",
+        )
+    )
 
 
 def show_table(connection, table_name, columns, order_by):
