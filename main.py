@@ -3,10 +3,23 @@ import os
 from colorama import init
 
 from src.db import get_connection
-from src.display import show_all_tables
+from src.display import get_all_table_rows, show_all_tables, show_change_summary
 from src.reset import reset_database
-from src.status import print_database_status
-from src.transactions import delete_product_p1
+from src.status import (
+    connection_status_label,
+    data_status_label,
+    get_overall_data_status,
+    is_connection_alive,
+    print_database_status,
+)
+from src.transactions import (
+    add_depot_d100_and_stock,
+    add_product_p100_and_stock,
+    delete_depot_d1,
+    delete_product_p1,
+    update_depot_d1_to_dd1,
+    update_product_p1_to_pp1,
+)
 
 
 def clear_screen():
@@ -29,6 +42,21 @@ def print_header():
     print("=" * 60)
 
 
+def print_runtime_status(connection):
+    """
+    Print current connection and data status for the main menu.
+    """
+    if is_connection_alive(connection):
+        connection_status = "CONNECTED"
+    else:
+        connection_status = "DISCONNECTED"
+
+    data_status = get_overall_data_status(connection)
+
+    print(f"Database connection: {connection_status_label(connection_status)}")
+    print(f"Data status:         {data_status_label(data_status)}")
+
+
 def print_menu():
     print("\nMain Menu")
     print("-" * 60)
@@ -39,6 +67,11 @@ def print_menu():
     print("\nRequired Transactions")
     print("-" * 60)
     print("4. Delete product p1")
+    print("5. Delete depot d1")
+    print("6. Change product p1 to pp1")
+    print("7. Change depot d1 to dd1")
+    print("8. Add product p100 and stock row")
+    print("9. Add depot d100 and stock row")
 
     print("\n0. Exit")
     print("-" * 60)
@@ -68,6 +101,7 @@ def confirm_reset():
 def show_before_after(connection, transaction_title, transaction_function):
     """
     Display tables before and after a transaction.
+    Also show a row-level change summary.
     """
     clear_screen()
     print_header()
@@ -75,16 +109,26 @@ def show_before_after(connection, transaction_title, transaction_function):
     print(f"\n{transaction_title}")
     print("-" * 60)
 
+    before_rows = get_all_table_rows(connection)
+
     print("\nBEFORE")
     print("-" * 60)
     show_all_tables(connection)
 
     print("\nRunning transaction...")
-    transaction_function(connection)
+    transaction_success = transaction_function(connection)
 
-    print("\nAFTER")
+    after_rows = get_all_table_rows(connection)
+
+    if transaction_success:
+        print("\nAFTER COMMIT")
+    else:
+        print("\nAFTER ROLLBACK / CURRENT STATE")
+
     print("-" * 60)
     show_all_tables(connection)
+
+    show_change_summary(before_rows, after_rows)
 
     pause()
 
@@ -97,7 +141,7 @@ def main():
             while True:
                 clear_screen()
                 print_header()
-                print("Database connection: CONNECTED")
+                print_runtime_status(connection)
 
                 print_menu()
                 choice = input("Choose an option: ").strip()
@@ -132,6 +176,41 @@ def main():
                         connection,
                         "Transaction 1: Delete product p1",
                         delete_product_p1,
+                    )
+
+                elif choice == "5":
+                    show_before_after(
+                        connection,
+                        "Transaction 2: Delete depot d1",
+                        delete_depot_d1,
+                    )
+
+                elif choice == "6":
+                    show_before_after(
+                        connection,
+                        "Transaction 3: Change product p1 to pp1",
+                        update_product_p1_to_pp1,
+                    )
+
+                elif choice == "7":
+                    show_before_after(
+                        connection,
+                        "Transaction 4: Change depot d1 to dd1",
+                        update_depot_d1_to_dd1,
+                    )
+
+                elif choice == "8":
+                    show_before_after(
+                        connection,
+                        "Transaction 5: Add product p100 and stock row",
+                        add_product_p100_and_stock,
+                    )
+
+                elif choice == "9":
+                    show_before_after(
+                        connection,
+                        "Transaction 6: Add depot d100 and stock row",
+                        add_depot_d100_and_stock,
                     )
 
                 elif choice == "0":

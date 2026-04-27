@@ -69,6 +69,19 @@ def data_status_label(status):
     return status
 
 
+def connection_status_label(status):
+    """
+    Return a colored connection status.
+    """
+    if status == "CONNECTED":
+        return f"{Fore.GREEN}{status}{Style.RESET_ALL}"
+
+    if status == "DISCONNECTED":
+        return f"{Fore.RED}{status}{Style.RESET_ALL}"
+
+    return status
+
+
 def print_section(title):
     """
     Print a section title with a simple underline.
@@ -86,6 +99,19 @@ def print_status_row(status, item, detail):
     spacing = " " * max(0, 10 - len(plain_status))
 
     print(f"{colored_status}{spacing} {item:<18} {detail}")
+
+
+def is_connection_alive(connection):
+    """
+    Confirm that the current database connection can still respond.
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1;")
+            cursor.fetchone()
+        return True
+    except Exception:
+        return False
 
 
 def table_exists(connection, table_name):
@@ -168,6 +194,19 @@ def check_original_data(connection):
     return results
 
 
+def get_overall_data_status(connection):
+    """
+    Return ORIGINAL if all project tables match the expected original data.
+    Otherwise, return MODIFIED.
+    """
+    data_results = check_original_data(connection)
+
+    if all(result["matches_expected"] for result in data_results.values()):
+        return "ORIGINAL"
+
+    return "MODIFIED"
+
+
 def print_database_status(connection):
     """
     Print a clean database status report for the console app.
@@ -208,7 +247,9 @@ def print_database_status(connection):
 
     print_section("Overall Data Status")
 
-    if all(result["matches_expected"] for result in data_results.values()):
+    overall_status = get_overall_data_status(connection)
+
+    if overall_status == "ORIGINAL":
         print_status_row("[OK]", "Data status", data_status_label("ORIGINAL"))
         print("\nThe database matches the original project data.")
     else:

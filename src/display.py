@@ -1,4 +1,21 @@
+from colorama import Fore, Style
 from tabulate import tabulate
+
+
+TABLE_CONFIG = {
+    "Product": {
+        "columns": ["prodid", "pname", "price"],
+        "order_by": "prodid",
+    },
+    "Depot": {
+        "columns": ["depid", "addr", "volume"],
+        "order_by": "depid",
+    },
+    "Stock": {
+        "columns": ["prodid", "depid", "quantity"],
+        "order_by": "prodid, depid",
+    },
+}
 
 
 def print_rows(title, columns, rows):
@@ -23,10 +40,14 @@ def print_rows(title, columns, rows):
     )
 
 
-def show_table(connection, table_name, columns, order_by):
+def get_table_rows(connection, table_name):
     """
-    Query and display one database table.
+    Return rows for one project table.
     """
+    config = TABLE_CONFIG[table_name]
+    columns = config["columns"]
+    order_by = config["order_by"]
+
     with connection.cursor() as cursor:
         cursor.execute(
             f"""
@@ -35,32 +56,93 @@ def show_table(connection, table_name, columns, order_by):
             ORDER BY {order_by};
             """
         )
-        rows = cursor.fetchall()
+        return cursor.fetchall()
 
-    print_rows(table_name, columns, rows)
+
+def get_all_table_rows(connection):
+    """
+    Return current rows for Product, Depot, and Stock.
+    Used for before/after transaction comparison.
+    """
+    return {
+        table_name: get_table_rows(connection, table_name)
+        for table_name in TABLE_CONFIG
+    }
+
+
+def show_table(connection, table_name):
+    """
+    Query and display one database table.
+    """
+    config = TABLE_CONFIG[table_name]
+    rows = get_table_rows(connection, table_name)
+
+    print_rows(table_name, config["columns"], rows)
 
 
 def show_all_tables(connection):
     """
     Display Product, Depot, and Stock.
     """
-    show_table(
-        connection,
-        "Product",
-        ["prodid", "pname", "price"],
-        "prodid",
-    )
+    for table_name in TABLE_CONFIG:
+        show_table(connection, table_name)
 
-    show_table(
-        connection,
-        "Depot",
-        ["depid", "addr", "volume"],
-        "depid",
-    )
 
-    show_table(
-        connection,
-        "Stock",
-        ["prodid", "depid", "quantity"],
-        "prodid, depid",
-    )
+def print_change_table(title, columns, rows, color):
+    """
+    Print added or removed rows using a color.
+    """
+    if not rows:
+        return
+
+    colored_rows = [
+        tuple(f"{color}{value}{Style.RESET_ALL}" for value in row)
+        for row in rows
+    ]
+
+    print_rows(title, columns, colored_rows)
+
+
+def show_change_summary(before_rows, after_rows):
+    """
+    Show row-level differences between the before and after table states.
+
+    Green rows were added.
+    Red rows were removed.
+    """
+    print("\nCHANGE SUMMARY")
+    print("-" * 60)
+
+    any_changes = False
+
+    for table_name, config in TABLE_CONFIG.items():
+        before_set = set(before_rows[table_name])
+        after_set = set(after_rows[table_name])
+
+        removed_rows = sorted(before_set - after_set)
+        added_rows = sorted(after_set - before_set)
+
+        if not removed_rows and not added_rows:
+            continue
+
+        any_changes = True
+
+        print(f"\n{table_name}")
+        print("-" * 60)
+
+        print_change_table(
+            "Removed rows",
+            config["columns"],
+            removed_rows,
+            Fore.RED,
+        )
+
+        print_change_table(
+            "Added rows",
+            config["columns"],
+            added_rows,
+            Fore.GREEN,
+        )
+
+    if not any_changes:
+        print("No row-level changes detected.")
