@@ -37,7 +37,7 @@ The main focus of the project is not a front end or web interface. Instead, this
 
 - PostgreSQL table design
 - Primary key and foreign key constraints
-- Reactive constraints using `ON DELETE CASCADE` and `ON UPDATE CASCADE`
+- Cascading referential actions using `ON DELETE CASCADE` and `ON UPDATE CASCADE`
 - Transaction commit and rollback behavior
 - Before/after transaction results
 - Database reset and status checking
@@ -69,7 +69,8 @@ cs623-project/
 │   ├── 01_create_tables.sql
 │   ├── 02_insert_data.sql
 │   ├── 03_add_constraints.sql
-│   └── 04_verify_setup.sql
+│   ├── 04_verify_setup.sql
+│   └── 99_admin_create_user_example.sql
 │
 ├── src/
 │   ├── __init__.py
@@ -117,7 +118,7 @@ Stock(prodid, depid, quantity)
 | Stock | `prodid` | Product(`prodid`) |
 | Stock | `depid` | Depot(`depid`) |
 
-### Reactive Constraint Behavior
+### Referential Actions and Checks
 
 The foreign keys use cascading behavior:
 
@@ -132,6 +133,13 @@ This means:
 - If a depot is deleted, related stock rows are automatically deleted.
 - If a product ID is changed, related stock rows are automatically updated.
 - If a depot ID is changed, related stock rows are automatically updated.
+
+The schema also includes check constraints to keep product prices and depot volumes nonnegative:
+
+```sql
+CHECK (price >= 0)
+CHECK (volume >= 0)
+```
 
 ---
 
@@ -215,8 +223,9 @@ The `sql/` folder contains the database setup scripts.
 | `02_insert_data.sql` | Inserts the original project data. |
 | `03_add_constraints.sql` | Adds primary keys, foreign keys, and cascade behavior. |
 | `04_verify_setup.sql` | Runs basic queries to verify setup. |
+| `99_admin_create_user_example.sql` | Example admin-only script for creating the project database user. |
 
-The constraints are intentionally stored in their own script so the schema creation, data insertion, and constraint logic are clearly separated.
+The constraints are intentionally stored in their own script so the schema creation, data insertion, and constraint logic are clearly separated. This script includes primary keys, foreign keys, cascading referential actions, and nonnegative checks for product price and depot volume.
 
 ---
 
@@ -336,17 +345,25 @@ pip install -r requirements.txt
 
 ### 5. Create the PostgreSQL database
 
-If the database does not already exist, run the database creation script manually with an admin PostgreSQL user:
+To create a fresh project database, run the database creation script manually with an admin PostgreSQL user:
 
 ```bash
 psql -U postgres -d postgres -f sql/00_create_database.sql
 ```
 
+This script runs `DROP DATABASE IF EXISTS cs623_project` before creating the database, so only use it when you want a fresh database.
+
 ### 6. Create a project database user
 
 The application is intended to run using a normal project user, not the PostgreSQL admin account.
 
-Example:
+An example script is included at:
+
+```text
+sql/99_admin_create_user_example.sql
+```
+
+Review the password placeholder before running it. The equivalent SQL is:
 
 ```sql
 CREATE ROLE cs623_user
@@ -364,7 +381,7 @@ ALTER DATABASE cs623_project OWNER TO cs623_user;
 GRANT CONNECT ON DATABASE cs623_project TO cs623_user;
 ```
 
-Then connect to the project database and grant schema/table permissions:
+If the project user does not own the database objects, connect to the project database and grant schema/table permissions:
 
 ```sql
 \c cs623_project
