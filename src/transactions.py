@@ -1,3 +1,6 @@
+from src.ui import error, info, success, warning
+
+
 def delete_product_p1(connection):
     """
     Transaction 1:
@@ -22,15 +25,15 @@ def delete_product_p1(connection):
                 )
 
         connection.commit()
-        print("\nTransaction committed successfully.")
+        print(success("\nTransaction committed successfully."))
         print("Deleted Product row: p1")
-        print("Related Stock rows were handled by PostgreSQL ON DELETE CASCADE.")
+        print(info("Related Stock rows were handled by PostgreSQL ON DELETE CASCADE."))
         return True
 
-    except Exception as error:
+    except Exception as transaction_error:
         connection.rollback()
-        print("\nTransaction failed. Changes were rolled back.")
-        print(f"Reason: {error}")
+        print(error("\nTransaction failed. Changes were rolled back."))
+        print(f"{warning('Reason:')} {transaction_error}")
         return False
 
 
@@ -58,15 +61,15 @@ def delete_depot_d1(connection):
                 )
 
         connection.commit()
-        print("\nTransaction committed successfully.")
+        print(success("\nTransaction committed successfully."))
         print("Deleted Depot row: d1")
-        print("Related Stock rows were handled by PostgreSQL ON DELETE CASCADE.")
+        print(info("Related Stock rows were handled by PostgreSQL ON DELETE CASCADE."))
         return True
 
-    except Exception as error:
+    except Exception as transaction_error:
         connection.rollback()
-        print("\nTransaction failed. Changes were rolled back.")
-        print(f"Reason: {error}")
+        print(error("\nTransaction failed. Changes were rolled back."))
+        print(f"{warning('Reason:')} {transaction_error}")
         return False
 
 
@@ -95,15 +98,15 @@ def update_product_p1_to_pp1(connection):
                 )
 
         connection.commit()
-        print("\nTransaction committed successfully.")
+        print(success("\nTransaction committed successfully."))
         print("Updated Product prodid: p1 -> pp1")
-        print("Related Stock rows were handled by PostgreSQL ON UPDATE CASCADE.")
+        print(info("Related Stock rows were handled by PostgreSQL ON UPDATE CASCADE."))
         return True
 
-    except Exception as error:
+    except Exception as transaction_error:
         connection.rollback()
-        print("\nTransaction failed. Changes were rolled back.")
-        print(f"Reason: {error}")
+        print(error("\nTransaction failed. Changes were rolled back."))
+        print(f"{warning('Reason:')} {transaction_error}")
         return False
 
 
@@ -132,15 +135,15 @@ def update_depot_d1_to_dd1(connection):
                 )
 
         connection.commit()
-        print("\nTransaction committed successfully.")
+        print(success("\nTransaction committed successfully."))
         print("Updated Depot depid: d1 -> dd1")
-        print("Related Stock rows were handled by PostgreSQL ON UPDATE CASCADE.")
+        print(info("Related Stock rows were handled by PostgreSQL ON UPDATE CASCADE."))
         return True
 
-    except Exception as error:
+    except Exception as transaction_error:
         connection.rollback()
-        print("\nTransaction failed. Changes were rolled back.")
-        print(f"Reason: {error}")
+        print(error("\nTransaction failed. Changes were rolled back."))
+        print(f"{warning('Reason:')} {transaction_error}")
         return False
 
 
@@ -172,15 +175,15 @@ def add_product_p100_and_stock(connection):
             )
 
         connection.commit()
-        print("\nTransaction committed successfully.")
+        print(success("\nTransaction committed successfully."))
         print("Inserted Product row: (p100, cd, 5)")
         print("Inserted Stock row: (p100, d2, 50)")
         return True
 
-    except Exception as error:
+    except Exception as transaction_error:
         connection.rollback()
-        print("\nTransaction failed. Changes were rolled back.")
-        print(f"Reason: {error}")
+        print(error("\nTransaction failed. Changes were rolled back."))
+        print(f"{warning('Reason:')} {transaction_error}")
         return False
 
 
@@ -212,15 +215,15 @@ def add_depot_d100_and_stock(connection):
             )
 
         connection.commit()
-        print("\nTransaction committed successfully.")
+        print(success("\nTransaction committed successfully."))
         print("Inserted Depot row: (d100, Chicago, 100)")
         print("Inserted Stock row: (p1, d100, 100)")
         return True
 
-    except Exception as error:
+    except Exception as transaction_error:
         connection.rollback()
-        print("\nTransaction failed. Changes were rolled back.")
-        print(f"Reason: {error}")
+        print(error("\nTransaction failed. Changes were rolled back."))
+        print(f"{warning('Reason:')} {transaction_error}")
         return False
 
 
@@ -237,7 +240,7 @@ def rollback_failure_demo(connection):
     """
     try:
         with connection.cursor() as cursor:
-            print("\nAttempting demo transaction...")
+            print(info("\nAttempting demo transaction..."))
             print("Step 1: Insert Product row (p200, demo_item, 10)")
 
             cursor.execute(
@@ -249,7 +252,7 @@ def rollback_failure_demo(connection):
             )
 
             print("Step 2: Insert Stock row (p200, bad_depot, 25)")
-            print("This should fail because bad_depot does not exist in Depot.")
+            print(warning("This should fail because bad_depot does not exist in Depot."))
 
             cursor.execute(
                 """
@@ -260,14 +263,14 @@ def rollback_failure_demo(connection):
             )
 
         connection.commit()
-        print("\nUnexpected result: transaction committed.")
-        print("Check whether foreign key constraints are installed correctly.")
+        print(warning("\nUnexpected result: transaction committed."))
+        print(warning("Check whether foreign key constraints are installed correctly."))
         return True
 
-    except Exception as error:
+    except Exception as transaction_error:
         connection.rollback()
-        print("\nExpected failure occurred.")
-        print("Transaction was rolled back successfully.")
+        print(warning("\nExpected failure occurred."))
+        print(success("Transaction was rolled back successfully."))
         print("The Product insert from Step 1 was undone.")
-        print(f"Reason: {error}")
+        print(f"{warning('Reason:')} {transaction_error}")
         return False

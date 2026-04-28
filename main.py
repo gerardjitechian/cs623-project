@@ -7,8 +7,6 @@ from src.demo import run_guided_demo
 from src.display import get_all_table_rows, show_all_tables, show_change_summary
 from src.reset import reset_database
 from src.status import (
-    connection_status_label,
-    data_status_label,
     get_overall_data_status,
     is_connection_alive,
     print_database_status,
@@ -21,6 +19,15 @@ from src.transactions import (
     rollback_failure_demo,
     update_depot_d1_to_dd1,
     update_product_p1_to_pp1,
+)
+from src.ui import (
+    connection_status_label,
+    data_status_label,
+    error,
+    info,
+    success,
+    title,
+    warning,
 )
 
 
@@ -35,12 +42,12 @@ def pause():
     """
     Wait for the user before returning to the menu.
     """
-    input("\nPress Enter to return to the menu...")
+    input(info("\nPress Enter to return to the menu..."))
 
 
 def print_header():
     print("\n" + "=" * 60)
-    print("        Gerard's CS623 Database Project")
+    print(title("        Gerard's CS623 Database Project"))
     print("=" * 60)
 
 
@@ -60,13 +67,13 @@ def print_runtime_status(connection):
 
 
 def print_menu():
-    print("\nMain Menu")
+    print(f"\n{title('Main Menu')}")
     print("-" * 60)
     print("1. Show all tables")
     print("2. Verify database status")
     print("3. Reset database to original state")
 
-    print("\nRequired Transactions")
+    print(f"\n{title('Required Transactions')}")
     print("-" * 60)
     print("4. Delete product p1")
     print("5. Delete depot d1")
@@ -75,7 +82,7 @@ def print_menu():
     print("8. Add product p100 and stock row")
     print("9. Add depot d100 and stock row")
 
-    print("\nDemo")
+    print(f"\n{title('Demo')}")
     print("-" * 60)
     print("10. Run guided demo mode")
     print("11. Run rollback/failure demo")
@@ -91,12 +98,12 @@ def confirm_reset():
     clear_screen()
     print_header()
 
-    print("\nReset Database")
+    print(f"\n{title('Reset Database')}")
     print("-" * 60)
     print("This will restore the database to the original project data.")
-    print("Any changes from previous transaction tests will be removed.")
+    print(warning("Any changes from previous transaction tests will be removed."))
     print()
-    print("Type RESET to continue.")
+    print(f"Type {warning('RESET')} to continue.")
     print("Press Enter to cancel and return to the main menu.")
     print("-" * 60)
 
@@ -113,24 +120,24 @@ def show_before_after(connection, transaction_title, transaction_function):
     clear_screen()
     print_header()
 
-    print(f"\n{transaction_title}")
+    print(f"\n{title(transaction_title)}")
     print("-" * 60)
 
     before_rows = get_all_table_rows(connection)
 
-    print("\nBEFORE")
+    print(f"\n{title('BEFORE')}")
     print("-" * 60)
     show_all_tables(connection)
 
-    print("\nRunning transaction...")
+    print(info("\nRunning transaction..."))
     transaction_success = transaction_function(connection)
 
     after_rows = get_all_table_rows(connection)
 
     if transaction_success:
-        print("\nAFTER COMMIT")
+        print(f"\n{success('AFTER COMMIT')}")
     else:
-        print("\nAFTER ROLLBACK / CURRENT STATE")
+        print(f"\n{warning('AFTER ROLLBACK / CURRENT STATE')}")
 
     print("-" * 60)
     show_all_tables(connection)
@@ -151,7 +158,7 @@ def main():
                 print_runtime_status(connection)
 
                 print_menu()
-                choice = input("Choose an option: ").strip()
+                choice = input(info("Choose an option: ")).strip()
 
                 if choice == "1":
                     clear_screen()
@@ -175,7 +182,7 @@ def main():
                     else:
                         clear_screen()
                         print_header()
-                        print("\nReset cancelled. No changes were made.")
+                        print(warning("\nReset cancelled. No changes were made."))
                         pause()
 
                 elif choice == "4":
@@ -232,16 +239,16 @@ def main():
 
                 elif choice == "0":
                     clear_screen()
-                    print("Exiting Gerard's CS623 Database Project. Session complete.")
+                    print(success("Exiting Gerard's CS623 Database Project. Session complete."))
                     break
 
                 else:
-                    print("\nInvalid option. Please try again.")
+                    print(error("\nInvalid option. Please try again."))
                     pause()
 
-    except Exception as error:
-        print("Something went wrong.")
-        print(error)
+    except Exception as unexpected_error:
+        print(error("Something went wrong."))
+        print(unexpected_error)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,11 @@
 from decimal import Decimal
 
-from colorama import Fore, Style
+from src.ui import (
+    data_status_label,
+    print_section,
+    print_status_row,
+    status_label,
+)
 
 
 # Expected original data based on sql/02_insert_data.sql
@@ -38,67 +43,6 @@ EXPECTED_DATA = {
         ],
     },
 }
-
-
-def status_label(label):
-    """
-    Return a colored status label for console output.
-    """
-    if label == "[OK]":
-        return f"{Fore.GREEN}{label}{Style.RESET_ALL}"
-
-    if label == "[WARNING]":
-        return f"{Fore.YELLOW}{label}{Style.RESET_ALL}"
-
-    if label == "[ERROR]":
-        return f"{Fore.RED}{label}{Style.RESET_ALL}"
-
-    return label
-
-
-def data_status_label(status):
-    """
-    Return a colored overall data status.
-    """
-    if status == "ORIGINAL":
-        return f"{Fore.GREEN}{status}{Style.RESET_ALL}"
-
-    if status == "MODIFIED":
-        return f"{Fore.RED}{status}{Style.RESET_ALL}"
-
-    return status
-
-
-def connection_status_label(status):
-    """
-    Return a colored connection status.
-    """
-    if status == "CONNECTED":
-        return f"{Fore.GREEN}{status}{Style.RESET_ALL}"
-
-    if status == "DISCONNECTED":
-        return f"{Fore.RED}{status}{Style.RESET_ALL}"
-
-    return status
-
-
-def print_section(title):
-    """
-    Print a section title with a simple underline.
-    """
-    print(f"\n{title}")
-    print("-" * 72)
-
-
-def print_status_row(status, item, detail):
-    """
-    Print one aligned status row.
-    """
-    plain_status = status
-    colored_status = status_label(status)
-    spacing = " " * max(0, 10 - len(plain_status))
-
-    print(f"{colored_status}{spacing} {item:<18} {detail}")
 
 
 def is_connection_alive(connection):

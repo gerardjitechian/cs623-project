@@ -1,6 +1,8 @@
 import time
 from pathlib import Path
 
+from src.ui import error, info, success, title, warning
+
 
 def run_sql_file(connection, file_path):
     """
@@ -21,14 +23,14 @@ def show_loading_bar(message="Resetting database"):
     delay = total_seconds / total_steps
 
     print()
-    print(message)
+    print(info(message))
 
     for step in range(total_steps + 1):
         filled = "█" * step
         empty = "░" * (total_steps - step)
         percent = int((step / total_steps) * 100)
 
-        print(f"\r[{filled}{empty}] {percent}%", end="", flush=True)
+        print(f"\r{info('[' + filled)}{empty}{info(']')} {percent}%", end="", flush=True)
         time.sleep(delay)
 
     print("\n")
@@ -51,16 +53,19 @@ def reset_database(connection):
     ]
 
     try:
+        print(title("Reset Process"))
+        print("-" * 60)
+
         for script_name in scripts:
             script_path = sql_folder / script_name
-            print(f"Running {script_name}...")
+            print(f"{info('Running')} {script_name}...")
             run_sql_file(connection, script_path)
 
         show_loading_bar()
         connection.commit()
-        print("Database reset completed successfully.")
+        print(success("Database reset completed successfully."))
 
     except Exception:
         connection.rollback()
-        print("\nDatabase reset failed. Changes were rolled back.")
+        print(error("\nDatabase reset failed. Changes were rolled back."))
         raise

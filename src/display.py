@@ -1,6 +1,8 @@
 from colorama import Fore, Style
 from tabulate import tabulate
 
+from src.ui import error, success, title
+
 
 TABLE_CONFIG = {
     "Product": {
@@ -18,11 +20,11 @@ TABLE_CONFIG = {
 }
 
 
-def print_rows(title, columns, rows):
+def print_rows(table_title, columns, rows):
     """
     Print rows as a clean console table.
     """
-    print(f"\n{title}")
+    print(f"\n{title(table_title)}")
     print("-" * 60)
 
     if not rows:
@@ -88,7 +90,7 @@ def show_all_tables(connection):
         show_table(connection, table_name)
 
 
-def print_change_table(title, columns, rows, color):
+def print_change_table(change_title, columns, rows, color):
     """
     Print added or removed rows using a color.
     """
@@ -100,7 +102,7 @@ def print_change_table(title, columns, rows, color):
         for row in rows
     ]
 
-    print_rows(title, columns, colored_rows)
+    print_rows(change_title, columns, colored_rows)
 
 
 def show_change_summary(before_rows, after_rows):
@@ -110,7 +112,7 @@ def show_change_summary(before_rows, after_rows):
     Green rows were added.
     Red rows were removed.
     """
-    print("\nCHANGE SUMMARY")
+    print(f"\n{title('CHANGE SUMMARY')}")
     print("-" * 60)
 
     any_changes = False
@@ -127,22 +129,22 @@ def show_change_summary(before_rows, after_rows):
 
         any_changes = True
 
-        print(f"\n{table_name}")
+        print(f"\n{title(table_name)}")
         print("-" * 60)
 
         print_change_table(
-            "Removed rows",
+            error("Removed rows"),
             config["columns"],
             removed_rows,
             Fore.RED,
         )
 
         print_change_table(
-            "Added rows",
+            success("Added rows"),
             config["columns"],
             added_rows,
             Fore.GREEN,
         )
 
     if not any_changes:
-        print("No row-level changes detected.")
+        print(success("No row-level changes detected."))

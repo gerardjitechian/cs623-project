@@ -9,6 +9,7 @@ from src.transactions import (
     update_depot_d1_to_dd1,
     update_product_p1_to_pp1,
 )
+from src.ui import info, success, title, warning
 
 
 DEMO_TRANSACTIONS = [
@@ -56,44 +57,43 @@ def run_guided_demo(connection, clear_screen, print_header, pause):
     clear_screen()
     print_header()
 
-    print("\nGuided Demo Mode")
+    print(f"\n{title('Guided Demo Mode')}")
     print("-" * 60)
     print("This mode runs all six required project transactions.")
     print("Before each transaction, the database is reset to the original state.")
     print("At the end, the database is reset one final time.")
     print("Each step will show BEFORE, AFTER, and a row-level change summary.")
     print()
-    print("Press Enter to begin the guided demo.")
+    print(info("Press Enter to begin the guided demo."))
     input()
 
     for demo_item in DEMO_TRANSACTIONS:
         clear_screen()
         print_header()
 
-        print(
-            f"\nDemo Step {demo_item['number']} of {len(DEMO_TRANSACTIONS)}: "
-            f"{demo_item['title']}"
-        )
+        step_title = f"Demo Step {demo_item['number']} of {len(DEMO_TRANSACTIONS)}"
+
+        print(f"\n{title(step_title)}: {demo_item['title']}")
         print("-" * 60)
 
-        print("\nResetting database before this transaction...")
+        print(info("\nResetting database before this transaction..."))
         reset_database(connection)
 
         before_rows = get_all_table_rows(connection)
 
-        print("\nBEFORE")
+        print(f"\n{title('BEFORE')}")
         print("-" * 60)
         show_all_tables(connection)
 
-        print("\nRunning transaction...")
+        print(info("\nRunning transaction..."))
         transaction_success = demo_item["function"](connection)
 
         after_rows = get_all_table_rows(connection)
 
         if transaction_success:
-            print("\nAFTER COMMIT")
+            print(f"\n{success('AFTER COMMIT')}")
         else:
-            print("\nAFTER ROLLBACK / CURRENT STATE")
+            print(f"\n{warning('AFTER ROLLBACK / CURRENT STATE')}")
 
         print("-" * 60)
         show_all_tables(connection)
@@ -101,16 +101,16 @@ def run_guided_demo(connection, clear_screen, print_header, pause):
         show_change_summary(before_rows, after_rows)
 
         if demo_item["number"] < len(DEMO_TRANSACTIONS):
-            print("\nGuided demo will continue to the next transaction.")
+            print(info("\nGuided demo will continue to the next transaction."))
             pause()
         else:
-            print("\nAll required transactions have been demonstrated.")
+            print(success("\nAll required transactions have been demonstrated."))
             pause()
 
     clear_screen()
     print_header()
 
-    print("\nFinal Cleanup")
+    print(f"\n{title('Final Cleanup')}")
     print("-" * 60)
     print("Resetting database one final time so the project ends in the original state.")
 
@@ -118,5 +118,5 @@ def run_guided_demo(connection, clear_screen, print_header, pause):
 
     print_database_status(connection)
 
-    print("\nGuided demo complete. The database is back to ORIGINAL.")
+    print(success("\nGuided demo complete. The database is back to ORIGINAL."))
     pause()
