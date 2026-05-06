@@ -23,8 +23,6 @@ This project uses the `Product`, `Depot`, and `Stock` relations from CS623 and i
 - [Required Transactions](#required-transactions)
 - [Rollback / Failure Demo](#rollback--failure-demo)
 - [Reset Behavior](#reset-behavior)
-- [Testing Checklist](#testing-checklist)
-- [Notes for Presentation](#notes-for-presentation)
 - [Author](#author)
 
 ---
@@ -599,84 +597,8 @@ Guided demo mode also resets the database before each transaction and performs a
 
 ---
 
-## Testing Checklist
-
-Manual testing was used for this project.
-
-### Basic App Test
-
-- [ ] Run `python main.py`
-- [ ] Confirm app opens without errors
-- [ ] Confirm database connection shows `CONNECTED`
-- [ ] Confirm menu displays correctly
-- [ ] Confirm exit works
-
-### Reset and Status Test
-
-- [ ] Choose option `3`
-- [ ] Type `RESET`
-- [ ] Choose option `2`
-- [ ] Confirm data status is `ORIGINAL`
-
-### Individual Transaction Tests
-
-For each transaction:
-
-- [ ] Reset database first
-- [ ] Run one transaction
-- [ ] Confirm BEFORE table output appears
-- [ ] Confirm AFTER table output appears
-- [ ] Confirm change summary appears
-- [ ] Confirm expected rows were added, removed, or updated
-
-Transactions tested:
-
-- [ ] Delete product `p1`
-- [ ] Delete depot `d1`
-- [ ] Change product `p1` to `pp1`
-- [ ] Change depot `d1` to `dd1`
-- [ ] Add product `p100` and stock row
-- [ ] Add depot `d100` and stock row
-
-### Guided Demo Test
-
-- [ ] Choose option `10`
-- [ ] Confirm all six transactions run
-- [ ] Confirm each transaction starts with a reset
-- [ ] Confirm final cleanup reset occurs
-- [ ] Confirm database ends with status `ORIGINAL`
-
-### Rollback Demo Test
-
-- [ ] Choose option `11`
-- [ ] Confirm intentional failure occurs
-- [ ] Confirm rollback message appears
-- [ ] Confirm no row-level changes are detected
-- [ ] Confirm database status remains `ORIGINAL`
-
----
-
-## Notes for Presentation
-
-A suggested explanation for the project:
-
-> This project uses Python as the application layer and PostgreSQL as the database layer. The Python console app connects to PostgreSQL, runs SQL transactions, and explicitly commits or rolls back changes. PostgreSQL enforces the primary keys, foreign keys, and cascading behavior. This keeps the database logic centered in the DBMS while Python provides a clean interface for demonstrating each transaction.
-
-Important points to mention:
-
-- The project is local, not cloud-based.
-- The app is console-based, not a web app.
-- The database uses primary keys and foreign keys.
-- Cascading behavior is handled by PostgreSQL.
-- Python controls commit and rollback behavior.
-- Reset mode makes the demo repeatable.
-- Guided demo mode walks through all required transactions.
-- Rollback demo proves atomicity.
-
----
-
 ## Author
 
-Gerard
+Gerard Jitechian
 
 CS623 - Database Management Systems
